@@ -1,0 +1,6 @@
+id,user_id,action,resource,metadata,previous_hash,hash,created_at
+5,guest_2,delete_item,reports/annual.pdf,{"source":"browser_simulator"},891c8ed04547f0fb0be5cb67e5b355e80b52a99155a37274284e63f3b34eef4e,0e6ff1644c2813bab043a109254afceee86e86a44d70b2096ad521a9f5991515,Wed Apr 08 2026 20:00:40 GMT+0000 (Coordinated Universal Time)
+4,user_102,update_profile,reports/annual.pdf,{"source":"browser_simulator"},939c7f6652a9151320c96a725c8998325d63f28g,891c8ed04547f0fb0be5cb67e5b355e80b52a99155a37274284e63f3b34eef4e,Wed Apr 08 2026 20:00:39 GMT+0000 (Coordinated Universal Time)
+3,admin_pete,export_data,audit_database,{"format":"csv";"destination":"S3"},828b6e5541f8040219b85f614b7887214c52e17f,939c7f6652a9151320c96a725c8998325d63f28g,Wed Apr 08 2026 19:45:05 GMT+0000 (Coordinated Universal Time)
+2,user_john,file_access,vault/report_q1.pdf,{"ip":"192.168.1.5"},716a5d4430e7939108a74e503a6776103b41d06e,828b6e5541f8040219b85f614b7887214c52e17f,Wed Apr 08 2026 19:00:05 GMT+0000 (Coordinated Universal Time)
+1,user_john,login,web_app,{"browser":"chrome"},0,716a5d4430e7939108a74e503a6776103b41d06e,Wed Apr 08 2026 18:00:05 GMT+0000 (Coordinated Universal Time)

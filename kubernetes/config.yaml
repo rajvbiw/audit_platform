@@ -1,0 +1,46 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audit-db-init
+  namespace: audit-platform
+data:
+  init.sql: |
+    CREATE TABLE IF NOT EXISTS tenants (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        api_key VARCHAR(255) UNIQUE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS audit_events (
+        id SERIAL PRIMARY KEY,
+        tenant_id INTEGER REFERENCES tenants(id),
+        user_id VARCHAR(255) NOT NULL,
+        action VARCHAR(255) NOT NULL,
+        resource VARCHAR(255) NOT NULL,
+        metadata JSONB DEFAULT '{}',
+        previous_hash TEXT NOT NULL,
+        hash TEXT NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE INDEX idx_audit_events_tenant_id ON audit_events(tenant_id);
+    CREATE INDEX idx_audit_events_created_at ON audit_events(created_at);
+    CREATE INDEX idx_audit_events_user_id ON audit_events(user_id);
+
+    INSERT INTO tenants (name, api_key) VALUES ('Default Tenant', 'test-api-key-123') ON CONFLICT DO NOTHING;
+
+    INSERT INTO audit_events (tenant_id, user_id, action, resource, metadata, previous_hash, hash, created_at)
+    VALUES 
+    (1, 'super_admin', 'login', 'audit_portal', '{"ip": "10.0.0.5", "geo": "US"}', '0', '716a5d4430e7939108a74e503a6776103b41d06e', NOW() - INTERVAL '24 hours'),
+    (1, 'dev_mike', 'view_config', 'secrets/db_config', '{"access_level": "read"}', '716a5d4430e7939108a74e503a6776103b41d06e', '828b6e5541f8040219b85f614b7887214c52e17f', NOW() - INTERVAL '23 hours'),
+    (1, 'system_bot', 'rotate_keys', 'kms/service_a', '{"status": "success"}', '828b6e5541f8040219b85f614b7887214c52e17f', '939c7f6652a9151320c96a725c8998325d63f28g', NOW() - INTERVAL '22 hours');
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: audit-app-config
+  namespace: audit-platform
+data:
+  REDIS_URL: "redis://audit-redis:6379"
+  PORT: "5000"

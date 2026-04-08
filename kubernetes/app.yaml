@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-backend
+  namespace: audit-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: audit-backend:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: audit-secrets
+              key: DATABASE_URL
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: audit-app-config
+              key: REDIS_URL
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: audit-app-config
+              key: PORT
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: audit-secrets
+              key: JWT_SECRET
+        ports:
+        - containerPort: 5000
+        volumeMounts:
+        - name: exports-storage
+          mountPath: /usr/src/app/exports
+      volumes:
+      - name: exports-storage
+        persistentVolumeClaim:
+          claimName: exports-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audit-backend
+  namespace: audit-platform
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 5000
+    targetPort: 5000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-worker
+  namespace: audit-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker
+  template:
+    metadata:
+      labels:
+        app: worker
+    spec:
+      containers:
+      - name: worker
+        image: audit-backend:latest
+        imagePullPolicy: IfNotPresent
+        command: ["npm", "run", "worker"]
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: audit-secrets
+              key: DATABASE_URL
+        - name: REDIS_URL
+          valueFrom:
+            configMapKeyRef:
+              name: audit-app-config
+              key: REDIS_URL
+        volumeMounts:
+        - name: exports-storage
+          mountPath: /usr/src/app/exports
+      volumes:
+      - name: exports-storage
+        persistentVolumeClaim:
+          claimName: exports-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-frontend
+  namespace: audit-platform
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: audit-frontend:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audit-frontend
+  namespace: audit-platform
+spec:
+  type: LoadBalancer
+  selector:
+    app: frontend
+  ports:
+  - port: 3074
+    targetPort: 80
