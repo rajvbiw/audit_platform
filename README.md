@@ -28,7 +28,7 @@ Visual overview of the application and deployment environment:
 </div>
 
 <div align="center">
-  <img src="photo/7.png" alt="Jenkins Dashboard" width="800"/>
+  <img src="photo/3.png" alt="Jenkins Dashboard" width="800"/>
   <p><em>Jenkins CI/CD Dashboard</em></p>
 </div>
 
